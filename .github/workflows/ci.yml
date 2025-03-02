@@ -1,0 +1,76 @@
+name: CI
+
+on: [push]
+
+jobs:
+  factory-kit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint & Prettier
+        run: |
+          yarn lint
+          yarn prettier:check
+
+      - name: Build
+        run: yarn build
+
+      - name: Test
+        run: yarn test
+
+  project-esm:
+    runs-on: node-22
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: |
+          cd project-test/project-esm
+          yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build
+
+      - name: Test
+        run: yarn test
+
+  project-cjs:
+    runs-on: node-22
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: |
+          cd project-test/project-cjs
+          yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build
+
+      - name: Test
+        run: yarn test

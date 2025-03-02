@@ -1,0 +1,19 @@
+{
+  "name": "factory-kit-test-typescript",
+  "version": "1.0.0",
+  "description": "Test project for factory-kit using TypeScript",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.0.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^18.0.0",
+    "factory-kit": "file:../../",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "factory-kit-test-esm",
+  "version": "1.0.0",
+  "description": "Test project for factory-kit using ESM and TypeScript",
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit",
+    "test": "jest"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@faker-js/faker": "^8.0.0",
+    "@types/jest": "^29.5.0",
+    "factory-kit": "file:../../",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  }
+}
