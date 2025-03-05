@@ -1,5 +1,13 @@
 # Factory-Kit
 
+## Disclaimer
+
+This library was inspired by a need I encountered repeatedly throughout my years of professional work. Creating consistent, type-safe test data has been a challenge I've faced across multiple projects and organizations.
+
+I initially started a lightweight version of this concept while working at Open Fun (https://github.com/openfun) to address specific testing needs there. This current iteration represents a more comprehensive solution to the problem.
+
+Worth mentioning: this version was developed through extensive pair programming with GitHub Copilot (what some might call "vibe coding" these days). The collaborative process between human intention and AI assistance helped shape both the implementation and documentation.
+
 A TypeScript library implementing the factory pattern for creating test data with Faker.js, inspired by Python's FactoryBoy.
 
 ## Introduction
