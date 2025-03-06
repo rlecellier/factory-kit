@@ -5,6 +5,7 @@
     "source.fixAll.eslint": "explicit"
   },
   "eslint.validate": ["javascript", "typescript"],
+  "eslint.experimental.useFlatConfig": true,
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "files.insertFinalNewline": true,
