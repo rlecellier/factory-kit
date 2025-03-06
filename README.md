@@ -30,6 +30,7 @@ Whether you're writing unit tests, integration tests, or creating demo applicati
   - [Sequences](#sequences)
   - [Dependent Attributes](#dependent-attributes)
   - [Related Factories](#related-factories)
+  - [Lifecycle Hooks](#lifecycle-hooks)
 - [API Reference](#api-reference)
 - [Roadmap](#roadmap)
   - [Missing Features](#missing-features)
@@ -413,6 +414,90 @@ const user = userFactory.build();
 console.log(user.profile); // Contains a generated profile
 ```
 
+### Lifecycle Hooks
+
+Lifecycle hooks allow you to run code at specific points during the object creation process. This is useful for performing setup, transformation, or validation operations.
+
+```typescript
+import { createFactory } from 'factory-kit';
+import { faker } from '@faker-js/faker';
+
+interface User {
+  id: number;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+  metadata?: Record<string, unknown>;
+}
+
+const userFactory = createFactory<User>()
+  .define({
+    id: () => faker.datatype.number(),
+    name: () => faker.name.fullName(),
+    createdAt: new Date(),
+    updatedAt: null,
+  })
+  .beforeBuild((user) => {
+    // Modify the object before it's finalized
+    user.createdAt = new Date('2023-01-01');
+    return user;
+  })
+  .afterBuild((user) => {
+    // Perform operations after object is built
+    user.updatedAt = new Date();
+    return user;
+  });
+
+// Hooks will run during build process
+const user = userFactory.build();
+```
+
+#### Asynchronous Hooks
+
+Lifecycle hooks support asynchronous operations as well:
+
+```typescript
+const userFactory = createFactory<User>()
+  .define({
+    id: () => faker.datatype.number(),
+    name: () => faker.name.fullName(),
+    createdAt: new Date(),
+  })
+  .beforeBuild(async (user) => {
+    // Perform async operations
+    user.metadata = await fetchExternalData(user.id);
+    return user;
+  });
+
+// Use buildAsync when working with async hooks
+const user = await userFactory.buildAsync();
+```
+
+#### Hook Execution Order
+
+Hooks execute in a predictable order:
+
+1. All `beforeBuild` hooks run in the order they were defined
+2. All `afterBuild` hooks run in the order they were defined
+
+Multiple hooks of the same type can be chained:
+
+```typescript
+const userFactory = createFactory<User>()
+  .define({
+    /* attributes */
+  })
+  .beforeBuild((user) => {
+    /* first beforeBuild hook */ return user;
+  })
+  .beforeBuild((user) => {
+    /* second beforeBuild hook */ return user;
+  })
+  .afterBuild((user) => {
+    /* afterBuild hook */ return user;
+  });
+```
+
 ## API Reference
 
 ### createFactory<T>()
@@ -458,37 +543,35 @@ Builds multiple objects with the defined attributes.
 
 **Returns:** An array of instances of type T
 
+#### beforeBuild(hook: LifecycleHook<T>): Factory<T>
+
+Adds a hook function that runs before the object is finalized.
+
+- `hook`: Function that receives and can modify the object
+
+**Returns:** The factory instance for chaining
+
+#### afterBuild(hook: LifecycleHook<T>): Factory<T>
+
+Adds a hook function that runs after the object is built.
+
+- `hook`: Function that receives and can modify the object
+
+**Returns:** The factory instance for chaining
+
+#### buildAsync(options?: BuildOptions<T>): Promise<T>
+
+Builds a single object asynchronously, allowing for async lifecycle hooks.
+
+- `options`: Same as for `build()`
+
+**Returns:** A Promise that resolves to an instance of type T
+
 ## Roadmap
 
 The following features are planned for future releases:
 
 ### Missing Features
-
-- **Lifecycle Hooks** - Before/after build hooks for setup or cleanup operations
-
-  ```typescript
-  import { createFactory } from 'factory-kit';
-
-  const userFactory = createFactory<User>()
-    .define({
-      id: () => faker.datatype.number(),
-      name: () => faker.name.fullName(),
-      createdAt: new Date(),
-    })
-    .beforeBuild((user) => {
-      // Modify the object before it's finalized
-      user.createdAt = new Date('2023-01-01');
-      return user;
-    })
-    .afterBuild((user) => {
-      // Perform operations after object is built
-      console.log(`Built user: ${user.name}`);
-      return user;
-    });
-
-  // Hooks will run during build process
-  const user = userFactory.build();
-  ```
 
 - **Inheritance** - Factory inheritance to create specialized factories from base factories
 
