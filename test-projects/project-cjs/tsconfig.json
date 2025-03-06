@@ -11,6 +11,6 @@
     "rootDir": ".",
     "types": ["jest", "node"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "jest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }
