@@ -15,6 +15,15 @@ export type AttributeFunction<T, TKey extends keyof T> = (
 ) => T[TKey];
 
 /**
+ * A lifecycle hook function that can modify the object during the build process.
+ *
+ * @template T The object type being built by the factory
+ * @param object The object being built
+ * @returns The modified object (or a Promise of the modified object for async hooks)
+ */
+export type LifecycleHook<T> = (object: T) => T | Promise<T>;
+
+/**
  * Defines the structure for configuring attributes in a factory.
  * Each attribute can be a static value, a function that generates the value dynamically,
  * or a direct value from a faker function call.
@@ -75,12 +84,37 @@ export interface Factory<T> {
   trait: (name: string, attributes: AttributesFor<T>) => Factory<T>;
 
   /**
+   * Adds a hook that runs before the object is finalized.
+   *
+   * @param hook Function that receives and can modify the object
+   * @returns The factory instance for chaining
+   */
+  beforeBuild: (hook: LifecycleHook<T>) => Factory<T>;
+
+  /**
+   * Adds a hook that runs after the object is built.
+   *
+   * @param hook Function that receives and can modify the object
+   * @returns The factory instance for chaining
+   */
+  afterBuild: (hook: LifecycleHook<T>) => Factory<T>;
+
+  /**
    * Builds a single instance of the object.
    *
    * @param options Optional build configuration including traits and overrides
    * @returns A new instance of type T
    */
   build: (options?: BuildOptions<T>) => T;
+
+  /**
+   * Builds a single instance of the object asynchronously.
+   * This method is used when hooks contain async operations.
+   *
+   * @param options Optional build configuration including traits and overrides
+   * @returns A Promise that resolves to a new instance of type T
+   */
+  buildAsync: (options?: BuildOptions<T>) => Promise<T>;
 
   /**
    * Builds multiple instances of the object.
