@@ -188,6 +188,7 @@ describe('Factory lifecycle hooks', () => {
         if (user.metadata && user.metadata.role === 'admin') {
           user.email = 'admin@example.com';
         }
+
         return user;
       });
 
