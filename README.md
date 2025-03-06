@@ -46,12 +46,16 @@ npm install factory-kit @faker-js/faker
 yarn add factory-kit @faker-js/faker
 ```
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 ## Why Factory-Kit?
 
 - **DRY Test Data**: Define your test data structures once and reuse them across your test suite
 - **Type Safety**: Full TypeScript support ensures your factories produce objects that match your interfaces
 - **Realistic Data**: Leverage Faker.js to generate realistic names, emails, dates, and more
 - **Composable**: Combine factories to create complex, related object structures
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ## Basic Usage
 
@@ -124,6 +128,8 @@ const users = userFactory.buildMany(3);
 console.log(users.length); // 3
 ```
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 ## Advanced Features
 
 ### Using Traits
@@ -157,6 +163,8 @@ const user = userFactory.build({ traits: ['admin', 'withCustomEmail'] });
 console.log(user.isAdmin); // true
 console.log(user.email); // custom@example.org
 ```
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ### Overriding Attributes
 
@@ -210,6 +218,8 @@ console.log(user.name); // John Doe
 console.log(user.profile.bio); // Custom bio
 console.log(user.profile.preferences.theme); // dark
 ```
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ### Unique Values
 
@@ -293,6 +303,8 @@ clearAllUniqueStores();
 
 This is particularly useful in test setups to ensure test isolation.
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 ### Sequences
 
 Generate sequential values with incrementing counters:
@@ -361,6 +373,8 @@ resetSequence('userId');
 resetSequence();
 ```
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 ### Dependent Attributes
 
 Attributes can depend on other attributes:
@@ -380,6 +394,8 @@ const user = userFactory.build();
 // The email will be based on the generated firstName and lastName
 // The username will be based on just the firstName
 ```
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ### Related Factories
 
@@ -413,6 +429,8 @@ const userFactory = createFactory<User>().define({
 const user = userFactory.build();
 console.log(user.profile); // Contains a generated profile
 ```
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ### Lifecycle Hooks
 
@@ -498,6 +516,8 @@ const userFactory = createFactory<User>()
   });
 ```
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 ## API Reference
 
 ### createFactory<T>()
@@ -505,6 +525,8 @@ const userFactory = createFactory<User>()
 Creates a new factory for building objects of type T.
 
 **Returns:** Factory<T>
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ### Factory<T>
 
@@ -516,6 +538,8 @@ Defines the default attributes for the factory.
 
 **Returns:** The factory instance for chaining
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 #### trait(name: string, attributes: AttributesFor<T>): Factory<T>
 
 Defines a trait that can be applied when building objects.
@@ -524,6 +548,8 @@ Defines a trait that can be applied when building objects.
 - `attributes`: An object containing attribute overrides for this trait.
 
 **Returns:** The factory instance for chaining
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 #### build(options?: BuildOptions<T>): T
 
@@ -534,6 +560,8 @@ Builds a single object with the defined attributes.
 
 **Returns:** An instance of type T
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 #### buildMany(count: number, options?: BuildOptions<T>): T[]
 
 Builds multiple objects with the defined attributes.
@@ -543,6 +571,8 @@ Builds multiple objects with the defined attributes.
 
 **Returns:** An array of instances of type T
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 #### beforeBuild(hook: LifecycleHook<T>): Factory<T>
 
 Adds a hook function that runs before the object is finalized.
@@ -550,6 +580,8 @@ Adds a hook function that runs before the object is finalized.
 - `hook`: Function that receives and can modify the object
 
 **Returns:** The factory instance for chaining
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 #### afterBuild(hook: LifecycleHook<T>): Factory<T>
 
@@ -559,6 +591,8 @@ Adds a hook function that runs after the object is built.
 
 **Returns:** The factory instance for chaining
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 #### buildAsync(options?: BuildOptions<T>): Promise<T>
 
 Builds a single object asynchronously, allowing for async lifecycle hooks.
@@ -566,6 +600,8 @@ Builds a single object asynchronously, allowing for async lifecycle hooks.
 - `options`: Same as for `build()`
 
 **Returns:** A Promise that resolves to an instance of type T
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ## Roadmap
 
@@ -722,12 +758,16 @@ The following features are planned for future releases:
 
 Adding these would make your factory library more comprehensive for complex testing scenarios.
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 ## Example Projects
 
 - **Unit Testing**: Generate consistent test data for your unit tests
 - **Storybook**: Create realistic props for your component stories
 - **Demo Applications**: Populate your demo apps with realistic data
 - **Development**: Use while developing to simulate API responses
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ## Contributing
 
@@ -738,6 +778,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ## License
 
