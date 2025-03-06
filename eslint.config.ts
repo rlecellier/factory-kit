@@ -53,7 +53,7 @@ const config: ReturnType<typeof tseslint.config> = tseslint.config(
     name: 'typescript-eslint overrides',
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.json', 'test-projects/*/tsconfig.json'],
+        project: ['./tsconfig.json', 'test-projects/**/tsconfig.json'],
         warnOnUnsupportedTypeScriptVersion: false,
       },
     },

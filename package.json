@@ -9,7 +9,7 @@
     "generate:types": "tsc --project tsconfig.json --emitDeclarationOnly --declarationMap",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:all": "yarn test && yarn build && yarn lint",
-    "lint": "eslint --cache --cache-strategy content .",
+    "lint": "eslint --max-warnings 0 .",
     "ts-check": "tsc",
     "prepublishOnly": "npm run build",
     "format": "prettier --cache --write ."

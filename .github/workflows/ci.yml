@@ -43,7 +43,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd project-test/project-esm
+          cd test-projects/project-esm
           yarn install --frozen-lockfile
 
       - name: Build
@@ -66,7 +66,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd project-test/project-cjs
+          cd test-projects/project-cjs
           yarn install --frozen-lockfile
 
       - name: Build
