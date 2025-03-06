@@ -612,77 +612,44 @@ The following features are planned for future releases:
 - **Inheritance** - Factory inheritance to create specialized factories from base factories
 
   ```typescript
-  import { createFactory } from 'factory-kit';
-
   // Base person factory
   const personFactory = createFactory<Person>().define({
     name: () => faker.name.fullName(),
     email: () => faker.internet.email(),
-    age: () => faker.datatype.number({ min: 18, max: 65 }),
   });
 
   // Employee extends Person with additional attributes
   const employeeFactory = personFactory.extend<Employee>().define({
     employeeId: () => faker.datatype.number(),
     department: () => faker.commerce.department(),
-    hireDate: () => faker.date.past(),
   });
-
-  // Manager extends Employee with additional attributes
-  const managerFactory = employeeFactory.extend<Manager>().define({
-    subordinates: () => [],
-    level: 'middle',
-  });
-
-  const manager = managerFactory.build();
-  // Contains all attributes from Person, Employee, and Manager
   ```
 
 - **Transient Attributes** - Attributes used during building but not included in the final object
 
   ```typescript
-  import { createFactory } from 'factory-kit';
-
-  interface UserOutput {
-    id: number;
-    fullName: string;
-    email: string;
-  }
-
   const userFactory = createFactory<UserOutput>().define(
     {
       id: () => faker.datatype.number(),
-      // Transient attributes - used during building but excluded from result
+      // Transient attributes excluded from result
       _firstName: () => faker.name.firstName(),
       _lastName: () => faker.name.lastName(),
       // Use transient attributes in computed values
       fullName: ({ _firstName, _lastName }) => `${_firstName} ${_lastName}`,
-      email: ({ _firstName, _lastName }) =>
-        `${_firstName}.${_lastName}@example.com`.toLowerCase(),
     },
-    {
-      transientAttributes: ['_firstName', '_lastName'],
-    }
+    { transientAttributes: ['_firstName', '_lastName'] }
   );
-
-  const user = userFactory.build();
-  // Result: { id: 123, fullName: 'Jane Doe', email: 'jane.doe@example.com' }
-  // _firstName and _lastName are not included in the final object
   ```
 
 - **Persistence Integration** - Direct integration with ORMs to save created objects
 
   ```typescript
-  import { createFactory } from 'factory-kit';
-  import { UserModel } from './my-orm-models';
-
   const userFactory = createFactory<User>()
     .define({
       name: () => faker.name.fullName(),
       email: () => faker.internet.email(),
     })
     .adapter({
-      // Define how to persist the object
       save: async (attributes) => {
         const user = new UserModel(attributes);
         await user.save();
@@ -690,68 +657,32 @@ The following features are planned for future releases:
       },
     });
 
-  // Create AND persist a user to the database
+  // Create AND persist a user
   const savedUser = await userFactory.create();
-
-  // Create multiple persisted users
-  const savedUsers = await userFactory.createMany(3);
   ```
 
 - **Batch Customization** - Ways to customize individual objects in a buildMany operation
 
   ```typescript
-  import { createFactory } from 'factory-kit';
-
-  const userFactory = createFactory<User>().define({
-    id: () => faker.datatype.number(),
-    name: () => faker.name.fullName(),
-    role: 'user',
-  });
-
-  // Build many with individual customizations
   const users = userFactory.buildMany(3, {
     customize: [
-      // First user gets these overrides
       { name: 'Admin User', role: 'admin' },
-      // Second user gets these overrides
       { role: 'moderator' },
-      // Third user uses default attributes (no overrides provided)
+      // Third user uses default attributes
     ],
   });
-
-  // Result:
-  // [
-  //   { id: 123, name: 'Admin User', role: 'admin' },
-  //   { id: 456, name: 'Jane Doe', role: 'moderator' },
-  //   { id: 789, name: 'John Smith', role: 'user' }
-  // ]
   ```
 
 - **Seeding** - Ability to set a specific seed for reproducible test data generation
 
   ```typescript
-  import { createFactory, setSeed } from 'factory-kit';
-
-  // Set a global seed for all factories
+  // Set a global seed
   setSeed('consistent-test-data-seed');
 
-  const userFactory = createFactory<User>().define({
-    id: () => faker.datatype.number(),
-    name: () => faker.name.fullName(),
-    email: () => faker.internet.email(),
-  });
-
-  // These will produce the same data every time with the same seed
-  const user1 = userFactory.build();
-
-  // Reset and use a different seed for a different test suite
-  setSeed('another-test-suite-seed');
-  const user2 = userFactory.build(); // Different from user1
-
-  // Can also set seed for specific factory instances
+  // Or set seed for specific factory instances
   const productFactory = createFactory<Product>()
     .define({
-      /* attributes */
+      /*attributes*/
     })
     .seed('product-specific-seed');
   ```
