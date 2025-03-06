@@ -15,62 +15,54 @@ jobs:
           node-version: '22'
           cache: 'yarn'
 
-      - name: Install dependencies
+      - name: factory-kit - Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Lint & Prettier
+      - name: factory-kit - Lint & Prettier
         run: |
-          yarn lint
-          yarn prettier:check
+          yarn lint:factory-kit
+          yarn format
 
-      - name: Build
+      - name: factory-kit - Build
         run: yarn build
 
-      - name: Test
+      - name: factory-kit - Test
         run: yarn test
-
-  project-esm:
-    runs-on: node-22
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22'
-          cache: 'yarn'
-
-      - name: Install dependencies
+      
+      - name: project-esm - Install dependencies
         run: |
           cd test-projects/project-esm
           yarn install --frozen-lockfile
+        
+      - name: project-esm - Lint
+        run: |
+          yarn lint:project-esm
 
-      - name: Build
-        run: yarn build
+      - name: project-esm - Build
+        run: |
+          cd test-projects/project-esm
+          yarn build
 
-      - name: Test
-        run: yarn test
+      - name: project-esm - Test
+        run: | 
+          cd test-projects/project-esm
+          yarn test
 
-  project-cjs:
-    runs-on: node-22
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22'
-          cache: 'yarn'
-
-      - name: Install dependencies
+      - name: project-cjs - Install dependencies
         run: |
           cd test-projects/project-cjs
           yarn install --frozen-lockfile
 
-      - name: Build
-        run: yarn build
+      - name: project-cjs - Lint
+        run: |
+          yarn lint:project-cjs
 
-      - name: Test
-        run: yarn test
+      - name: project-cjs - Build
+        run: |
+          cd test-projects/project-cjs
+          yarn build
+
+      - name: project-cjs - Test
+        run: |
+          cd test-projects/project-cjs
+          yarn test
