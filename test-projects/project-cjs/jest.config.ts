@@ -6,7 +6,7 @@ module.exports = {
       'ts-jest',
       {
         tsconfig: './tsconfig.json',
-        useESM: false
+        useESM: false,
       },
     ],
   },
@@ -17,6 +17,6 @@ module.exports = {
   ],
   moduleDirectories: ['node_modules'],
   moduleNameMapper: {
-    '^factory-kit$': '<rootDir>/../../dist/index.js'
-  }
+    '^factory-kit$': '<rootDir>/../../dist/index.js',
+  },
 };
