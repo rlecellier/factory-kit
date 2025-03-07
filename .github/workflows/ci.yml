@@ -5,64 +5,87 @@ on: [push]
 jobs:
   factory-kit:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22'
           cache: 'yarn'
-
-      - name: factory-kit - Install dependencies
+      - name: Install dependencies
         run: yarn install --frozen-lockfile
-
-      - name: factory-kit - Lint & Prettier
+      - name: Lint & Prettier
         run: |
           yarn lint:factory-kit
           yarn format
-
-      - name: factory-kit - Build
+      - name: Build
         run: yarn build
-
-      - name: factory-kit - Test
+      - name: Test
         run: yarn test
-      
-      - name: project-esm - Install dependencies
-        run: |
-          cd test-projects/project-esm
-          yarn install --frozen-lockfile
-        
-      - name: project-esm - Lint
-        run: |
-          yarn lint:project-esm
+      - name: Upload factory-kit build
+        uses: actions/upload-artifact@v4
+        with:
+          name: factory-kit-dist
+          path: dist/
 
-      - name: project-esm - Build
-        run: |
-          cd test-projects/project-esm
-          yarn build
+  project-esm:
+    needs: factory-kit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: test-projects/project-esm
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'yarn'
+      - name: Install factory-kit dependencies
+        working-directory: .
+        run: yarn install --frozen-lockfile
+      - name: Download factory-kit build
+        uses: actions/download-artifact@v4
+        with:
+          name: factory-kit-dist
+          path: dist/
+      - name: Install project-esm dependencies
+        run: yarn install --frozen-lockfile
+      - name: Lint
+        working-directory: .
+        run: yarn lint:project-esm
+      - name: Build
+        run: yarn build
+      - name: Test
+        run: yarn test
 
-      - name: project-esm - Test
-        run: | 
-          cd test-projects/project-esm
-          yarn test
-
-      - name: project-cjs - Install dependencies
-        run: |
-          cd test-projects/project-cjs
-          yarn install --frozen-lockfile
-
-      - name: project-cjs - Lint
-        run: |
-          yarn lint:project-cjs
-
-      - name: project-cjs - Build
-        run: |
-          cd test-projects/project-cjs
-          yarn build
-
-      - name: project-cjs - Test
-        run: |
-          cd test-projects/project-cjs
-          yarn test
+  project-cjs:
+    needs: factory-kit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: test-projects/project-cjs
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'yarn'
+      - name: Install factory-kit dependencies
+        working-directory: .
+        run: yarn install --frozen-lockfile
+      - name: Download factory-kit build
+        uses: actions/download-artifact@v4
+        with:
+          name: factory-kit-dist
+          path: dist/
+      - name: Install project-cjs dependencies
+        run: yarn install --frozen-lockfile
+      - name: Lint
+        working-directory: .
+        run: yarn lint:project-cjs
+      - name: Build
+        run: yarn build
+      - name: Test
+        run: yarn test
