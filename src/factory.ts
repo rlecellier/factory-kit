@@ -1,4 +1,9 @@
-import type { AttributesFor, BuildOptions, Factory } from '@/types';
+import type {
+  AttributesFor,
+  BuildOptions,
+  Factory,
+  LifecycleHook,
+} from '@/types';
 import { faker } from '@faker-js/faker';
 
 /**
@@ -10,6 +15,8 @@ import { faker } from '@faker-js/faker';
 export function createFactory<T>(): Factory<T> {
   const attributes: AttributesFor<T> = {} as AttributesFor<T>;
   const traits: Record<string, AttributesFor<T>> = {};
+  const beforeBuildHooks: Array<LifecycleHook<T>> = [];
+  const afterBuildHooks: Array<LifecycleHook<T>> = [];
 
   // Process nested overrides with double underscore notation (profile__name, profile__settings__theme)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,6 +122,42 @@ export function createFactory<T>(): Factory<T> {
     return instance;
   };
 
+  // Apply lifecycle hooks synchronously
+  const applyHooks = (instance: T): T => {
+    // Apply beforeBuild hooks
+    let result = { ...instance };
+
+    // Apply all beforeBuild hooks
+    for (const hook of beforeBuildHooks) {
+      result = hook(result) as T;
+    }
+
+    // Apply all afterBuild hooks
+    for (const hook of afterBuildHooks) {
+      result = hook(result) as T;
+    }
+
+    return result;
+  };
+
+  // Apply lifecycle hooks asynchronously
+  const applyHooksAsync = async (instance: T): Promise<T> => {
+    // Apply beforeBuild hooks
+    let result = { ...instance };
+
+    // Apply all beforeBuild hooks (which might be async)
+    for (const hook of beforeBuildHooks) {
+      result = await Promise.resolve(hook(result));
+    }
+
+    // Apply all afterBuild hooks (which might be async)
+    for (const hook of afterBuildHooks) {
+      result = await Promise.resolve(hook(result));
+    }
+
+    return result;
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   const factory: Factory<T> & Record<string, Function> = {
     define: (newAttributes) => {
@@ -127,14 +170,31 @@ export function createFactory<T>(): Factory<T> {
       return factory;
     },
 
+    beforeBuild: (hook) => {
+      beforeBuildHooks.push(hook);
+      return factory;
+    },
+
+    afterBuild: (hook) => {
+      afterBuildHooks.push(hook);
+      return factory;
+    },
+
     build: (options = {}) => {
-      return buildInstance(options);
+      const instance = buildInstance(options);
+      return applyHooks(instance);
+    },
+
+    buildAsync: async (options = {}) => {
+      const instance = buildInstance(options);
+      return await applyHooksAsync(instance);
     },
 
     buildMany: (count, options = {}) => {
       const results: T[] = [];
       for (let i = 0; i < count; i++) {
-        results.push(buildInstance(options));
+        const instance = buildInstance(options);
+        results.push(applyHooks(instance));
       }
 
       return results;

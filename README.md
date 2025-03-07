@@ -30,6 +30,7 @@ Whether you're writing unit tests, integration tests, or creating demo applicati
   - [Sequences](#sequences)
   - [Dependent Attributes](#dependent-attributes)
   - [Related Factories](#related-factories)
+  - [Lifecycle Hooks](#lifecycle-hooks)
 - [API Reference](#api-reference)
 - [Roadmap](#roadmap)
   - [Missing Features](#missing-features)
@@ -45,12 +46,16 @@ npm install factory-kit @faker-js/faker
 yarn add factory-kit @faker-js/faker
 ```
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 ## Why Factory-Kit?
 
 - **DRY Test Data**: Define your test data structures once and reuse them across your test suite
 - **Type Safety**: Full TypeScript support ensures your factories produce objects that match your interfaces
 - **Realistic Data**: Leverage Faker.js to generate realistic names, emails, dates, and more
 - **Composable**: Combine factories to create complex, related object structures
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ## Basic Usage
 
@@ -123,6 +128,8 @@ const users = userFactory.buildMany(3);
 console.log(users.length); // 3
 ```
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 ## Advanced Features
 
 ### Using Traits
@@ -156,6 +163,8 @@ const user = userFactory.build({ traits: ['admin', 'withCustomEmail'] });
 console.log(user.isAdmin); // true
 console.log(user.email); // custom@example.org
 ```
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ### Overriding Attributes
 
@@ -209,6 +218,8 @@ console.log(user.name); // John Doe
 console.log(user.profile.bio); // Custom bio
 console.log(user.profile.preferences.theme); // dark
 ```
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ### Unique Values
 
@@ -292,6 +303,8 @@ clearAllUniqueStores();
 
 This is particularly useful in test setups to ensure test isolation.
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 ### Sequences
 
 Generate sequential values with incrementing counters:
@@ -360,6 +373,8 @@ resetSequence('userId');
 resetSequence();
 ```
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 ### Dependent Attributes
 
 Attributes can depend on other attributes:
@@ -379,6 +394,8 @@ const user = userFactory.build();
 // The email will be based on the generated firstName and lastName
 // The username will be based on just the firstName
 ```
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ### Related Factories
 
@@ -413,6 +430,94 @@ const user = userFactory.build();
 console.log(user.profile); // Contains a generated profile
 ```
 
+[↑ Back to Table of Contents](#table-of-contents)
+
+### Lifecycle Hooks
+
+Lifecycle hooks allow you to run code at specific points during the object creation process. This is useful for performing setup, transformation, or validation operations.
+
+```typescript
+import { createFactory } from 'factory-kit';
+import { faker } from '@faker-js/faker';
+
+interface User {
+  id: number;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+  metadata?: Record<string, unknown>;
+}
+
+const userFactory = createFactory<User>()
+  .define({
+    id: () => faker.datatype.number(),
+    name: () => faker.name.fullName(),
+    createdAt: new Date(),
+    updatedAt: null,
+  })
+  .beforeBuild((user) => {
+    // Modify the object before it's finalized
+    user.createdAt = new Date('2023-01-01');
+    return user;
+  })
+  .afterBuild((user) => {
+    // Perform operations after object is built
+    user.updatedAt = new Date();
+    return user;
+  });
+
+// Hooks will run during build process
+const user = userFactory.build();
+```
+
+#### Asynchronous Hooks
+
+Lifecycle hooks support asynchronous operations as well:
+
+```typescript
+const userFactory = createFactory<User>()
+  .define({
+    id: () => faker.datatype.number(),
+    name: () => faker.name.fullName(),
+    createdAt: new Date(),
+  })
+  .beforeBuild(async (user) => {
+    // Perform async operations
+    user.metadata = await fetchExternalData(user.id);
+    return user;
+  });
+
+// Use buildAsync when working with async hooks
+const user = await userFactory.buildAsync();
+```
+
+#### Hook Execution Order
+
+Hooks execute in a predictable order:
+
+1. All `beforeBuild` hooks run in the order they were defined
+2. All `afterBuild` hooks run in the order they were defined
+
+Multiple hooks of the same type can be chained:
+
+```typescript
+const userFactory = createFactory<User>()
+  .define({
+    /* attributes */
+  })
+  .beforeBuild((user) => {
+    /* first beforeBuild hook */ return user;
+  })
+  .beforeBuild((user) => {
+    /* second beforeBuild hook */ return user;
+  })
+  .afterBuild((user) => {
+    /* afterBuild hook */ return user;
+  });
+```
+
+[↑ Back to Table of Contents](#table-of-contents)
+
 ## API Reference
 
 ### createFactory<T>()
@@ -420,6 +525,8 @@ console.log(user.profile); // Contains a generated profile
 Creates a new factory for building objects of type T.
 
 **Returns:** Factory<T>
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ### Factory<T>
 
@@ -431,6 +538,8 @@ Defines the default attributes for the factory.
 
 **Returns:** The factory instance for chaining
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 #### trait(name: string, attributes: AttributesFor<T>): Factory<T>
 
 Defines a trait that can be applied when building objects.
@@ -439,6 +548,8 @@ Defines a trait that can be applied when building objects.
 - `attributes`: An object containing attribute overrides for this trait.
 
 **Returns:** The factory instance for chaining
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 #### build(options?: BuildOptions<T>): T
 
@@ -449,6 +560,8 @@ Builds a single object with the defined attributes.
 
 **Returns:** An instance of type T
 
+[↑ Back to Table of Contents](#table-of-contents)
+
 #### buildMany(count: number, options?: BuildOptions<T>): T[]
 
 Builds multiple objects with the defined attributes.
@@ -458,112 +571,85 @@ Builds multiple objects with the defined attributes.
 
 **Returns:** An array of instances of type T
 
+[↑ Back to Table of Contents](#table-of-contents)
+
+#### beforeBuild(hook: LifecycleHook<T>): Factory<T>
+
+Adds a hook function that runs before the object is finalized.
+
+- `hook`: Function that receives and can modify the object
+
+**Returns:** The factory instance for chaining
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+#### afterBuild(hook: LifecycleHook<T>): Factory<T>
+
+Adds a hook function that runs after the object is built.
+
+- `hook`: Function that receives and can modify the object
+
+**Returns:** The factory instance for chaining
+
+[↑ Back to Table of Contents](#table-of-contents)
+
+#### buildAsync(options?: BuildOptions<T>): Promise<T>
+
+Builds a single object asynchronously, allowing for async lifecycle hooks.
+
+- `options`: Same as for `build()`
+
+**Returns:** A Promise that resolves to an instance of type T
+
+[↑ Back to Table of Contents](#table-of-contents)
+
 ## Roadmap
 
 The following features are planned for future releases:
 
 ### Missing Features
 
-- **Lifecycle Hooks** - Before/after build hooks for setup or cleanup operations
-
-  ```typescript
-  import { createFactory } from 'factory-kit';
-
-  const userFactory = createFactory<User>()
-    .define({
-      id: () => faker.datatype.number(),
-      name: () => faker.name.fullName(),
-      createdAt: new Date(),
-    })
-    .beforeBuild((user) => {
-      // Modify the object before it's finalized
-      user.createdAt = new Date('2023-01-01');
-      return user;
-    })
-    .afterBuild((user) => {
-      // Perform operations after object is built
-      console.log(`Built user: ${user.name}`);
-      return user;
-    });
-
-  // Hooks will run during build process
-  const user = userFactory.build();
-  ```
-
 - **Inheritance** - Factory inheritance to create specialized factories from base factories
 
   ```typescript
-  import { createFactory } from 'factory-kit';
-
   // Base person factory
   const personFactory = createFactory<Person>().define({
     name: () => faker.name.fullName(),
     email: () => faker.internet.email(),
-    age: () => faker.datatype.number({ min: 18, max: 65 }),
   });
 
   // Employee extends Person with additional attributes
   const employeeFactory = personFactory.extend<Employee>().define({
     employeeId: () => faker.datatype.number(),
     department: () => faker.commerce.department(),
-    hireDate: () => faker.date.past(),
   });
-
-  // Manager extends Employee with additional attributes
-  const managerFactory = employeeFactory.extend<Manager>().define({
-    subordinates: () => [],
-    level: 'middle',
-  });
-
-  const manager = managerFactory.build();
-  // Contains all attributes from Person, Employee, and Manager
   ```
 
 - **Transient Attributes** - Attributes used during building but not included in the final object
 
   ```typescript
-  import { createFactory } from 'factory-kit';
-
-  interface UserOutput {
-    id: number;
-    fullName: string;
-    email: string;
-  }
-
   const userFactory = createFactory<UserOutput>().define(
     {
       id: () => faker.datatype.number(),
-      // Transient attributes - used during building but excluded from result
+      // Transient attributes excluded from result
       _firstName: () => faker.name.firstName(),
       _lastName: () => faker.name.lastName(),
       // Use transient attributes in computed values
       fullName: ({ _firstName, _lastName }) => `${_firstName} ${_lastName}`,
-      email: ({ _firstName, _lastName }) =>
-        `${_firstName}.${_lastName}@example.com`.toLowerCase(),
     },
-    {
-      transientAttributes: ['_firstName', '_lastName'],
-    }
+    { transientAttributes: ['_firstName', '_lastName'] }
   );
-
-  const user = userFactory.build();
-  // Result: { id: 123, fullName: 'Jane Doe', email: 'jane.doe@example.com' }
-  // _firstName and _lastName are not included in the final object
   ```
 
 - **Persistence Integration** - Direct integration with ORMs to save created objects
 
   ```typescript
-  import { createFactory } from 'factory-kit';
-  import { UserModel } from './my-orm-models';
-
   const userFactory = createFactory<User>()
     .define({
       name: () => faker.name.fullName(),
       email: () => faker.internet.email(),
     })
     .adapter({
-      // Define how to persist the object
       save: async (attributes) => {
         const user = new UserModel(attributes);
         await user.save();
@@ -571,73 +657,39 @@ The following features are planned for future releases:
       },
     });
 
-  // Create AND persist a user to the database
+  // Create AND persist a user
   const savedUser = await userFactory.create();
-
-  // Create multiple persisted users
-  const savedUsers = await userFactory.createMany(3);
   ```
 
 - **Batch Customization** - Ways to customize individual objects in a buildMany operation
 
   ```typescript
-  import { createFactory } from 'factory-kit';
-
-  const userFactory = createFactory<User>().define({
-    id: () => faker.datatype.number(),
-    name: () => faker.name.fullName(),
-    role: 'user',
-  });
-
-  // Build many with individual customizations
   const users = userFactory.buildMany(3, {
     customize: [
-      // First user gets these overrides
       { name: 'Admin User', role: 'admin' },
-      // Second user gets these overrides
       { role: 'moderator' },
-      // Third user uses default attributes (no overrides provided)
+      // Third user uses default attributes
     ],
   });
-
-  // Result:
-  // [
-  //   { id: 123, name: 'Admin User', role: 'admin' },
-  //   { id: 456, name: 'Jane Doe', role: 'moderator' },
-  //   { id: 789, name: 'John Smith', role: 'user' }
-  // ]
   ```
 
 - **Seeding** - Ability to set a specific seed for reproducible test data generation
 
   ```typescript
-  import { createFactory, setSeed } from 'factory-kit';
-
-  // Set a global seed for all factories
+  // Set a global seed
   setSeed('consistent-test-data-seed');
 
-  const userFactory = createFactory<User>().define({
-    id: () => faker.datatype.number(),
-    name: () => faker.name.fullName(),
-    email: () => faker.internet.email(),
-  });
-
-  // These will produce the same data every time with the same seed
-  const user1 = userFactory.build();
-
-  // Reset and use a different seed for a different test suite
-  setSeed('another-test-suite-seed');
-  const user2 = userFactory.build(); // Different from user1
-
-  // Can also set seed for specific factory instances
+  // Or set seed for specific factory instances
   const productFactory = createFactory<Product>()
     .define({
-      /* attributes */
+      /*attributes*/
     })
     .seed('product-specific-seed');
   ```
 
 Adding these would make your factory library more comprehensive for complex testing scenarios.
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ## Example Projects
 
@@ -645,6 +697,8 @@ Adding these would make your factory library more comprehensive for complex test
 - **Storybook**: Create realistic props for your component stories
 - **Demo Applications**: Populate your demo apps with realistic data
 - **Development**: Use while developing to simulate API responses
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ## Contributing
 
@@ -655,6 +709,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+[↑ Back to Table of Contents](#table-of-contents)
 
 ## License
 
