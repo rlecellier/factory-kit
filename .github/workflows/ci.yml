@@ -48,8 +48,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: factory-kit-dist
-          path: dist/
-      - name: Install project-esm dependencies
+          path: ../../dist/
+      - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Lint
         working-directory: .
@@ -79,8 +79,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: factory-kit-dist
-          path: dist/
-      - name: Install project-cjs dependencies
+          path: ../../dist/
+      - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Lint
         working-directory: .
