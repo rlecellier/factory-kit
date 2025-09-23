@@ -70,6 +70,8 @@ describe('createFactory', () => {
           `${firstName}.${lastName}@example.com`.toLowerCase(),
         isAdmin: false,
         createdAt: new Date('2023-01-01'),
+        hobbies: () => ['reading', 'gaming', 'coding'],
+        favoriteHobby: ({ hobbies }) => hobbies[0],
       })
       .trait('admin', {
         isAdmin: true,
@@ -88,6 +90,8 @@ describe('createFactory', () => {
       email: () => faker.internet.email(),
       isAdmin: false,
       createdAt: new Date('2023-01-01'),
+      hobbies: () => ['reading', 'gaming', 'coding'],
+      favoriteHobby: ({ hobbies }) => hobbies[0],
     });
 
     const users = userFactory.buildMany(3);
@@ -105,6 +109,8 @@ describe('createFactory', () => {
       email: () => faker.internet.email(),
       isAdmin: false,
       createdAt: new Date('2023-01-01'),
+      hobbies: () => ['reading', 'gaming', 'coding'],
+      favoriteHobby: ({ hobbies }) => hobbies[0],
     });
 
     const user = userFactory.build({

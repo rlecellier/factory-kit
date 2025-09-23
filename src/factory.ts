@@ -1,4 +1,9 @@
-import type { AttributesFor, BuildOptions, Factory } from '@/types';
+import type {
+  AttributesFor,
+  BuildOptions,
+  ExtendedFactory,
+  Factory,
+} from '@/types';
 import { faker } from '@faker-js/faker';
 
 /**
@@ -9,7 +14,7 @@ import { faker } from '@faker-js/faker';
  */
 export function createFactory<T>(): Factory<T> {
   const attributes: AttributesFor<T> = {} as AttributesFor<T>;
-  const traits: Record<string, AttributesFor<T>> = {};
+  const traits: Record<string, Partial<AttributesFor<T>>> = {};
 
   // Process nested overrides with double underscore notation (profile__name, profile__settings__theme)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,7 +60,7 @@ export function createFactory<T>(): Factory<T> {
 
     // First pass: Apply all static values and direct faker calls
     for (const key of attributeKeys) {
-      const value = attributes[key as keyof T];
+      const value = attributes[key as keyof AttributesFor<T>];
 
       // Skip attribute functions that depend on other attributes
       if (typeof value === 'function' && !isFakerDirectCall(value)) {
@@ -71,7 +76,7 @@ export function createFactory<T>(): Factory<T> {
 
     // Second pass: Apply attribute functions that depend on other attributes
     for (const key of attributeKeys) {
-      const value = attributes[key as keyof T];
+      const value = attributes[key as keyof AttributesFor<T>];
 
       if (typeof value === 'function' && !isFakerDirectCall(value)) {
         // For attribute functions that require instance and faker
@@ -128,16 +133,32 @@ export function createFactory<T>(): Factory<T> {
     },
 
     extend: <TExtended extends T>() => {
-      const extendedFactory = createFactory<TExtended>();
-      // Copy all existing attributes to the new factory
-      extendedFactory.define(attributes as AttributesFor<TExtended>);
-      // Copy all existing traits to the new factory
-      Object.entries(traits).forEach(([name, traitAttributes]) => {
-        extendedFactory.trait(
-          name,
-          traitAttributes as AttributesFor<TExtended>
-        );
-      });
+      // Create the extended factory that only requires additional attributes
+      const extendedFactory: ExtendedFactory<TExtended, T> = {
+        define: (additionalAttributes) => {
+          // Create a full factory for the extended type
+          const fullFactory = createFactory<TExtended>();
+
+          // Merge parent attributes with additional attributes
+          const allAttributes = {
+            ...attributes,
+            ...additionalAttributes,
+          } as unknown as AttributesFor<TExtended>;
+
+          fullFactory.define(allAttributes);
+
+          // Copy all existing traits to the new factory
+          Object.entries(traits).forEach(([name, traitAttributes]) => {
+            fullFactory.trait(
+              name,
+              traitAttributes as unknown as Partial<AttributesFor<TExtended>>
+            );
+          });
+
+          return fullFactory;
+        },
+      };
+
       return extendedFactory;
     },
 
