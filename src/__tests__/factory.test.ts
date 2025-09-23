@@ -9,6 +9,8 @@ interface User {
   email: string;
   isAdmin: boolean;
   createdAt: Date;
+  hobbies: string[];
+  favoriteHobby: string;
 }
 
 describe('createFactory', () => {
@@ -23,6 +25,8 @@ describe('createFactory', () => {
         `${firstName}.${lastName}@example.com`.toLowerCase(),
       isAdmin: false,
       createdAt: new Date('2023-01-01'),
+      hobbies: () => ['reading', 'gaming', 'coding'],
+      favoriteHobby: ({ hobbies }) => hobbies[0],
     });
 
     const user = userFactory.build();
