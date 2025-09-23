@@ -124,6 +124,69 @@ describe('createFactory', () => {
     expect(user.lastName).toBe('Name');
   });
 
+  it('updates attribute functions with dependencies when overrides are provided', () => {
+    const userFactory = createFactory<User>().define({
+      id: () => faker.number.int(),
+      firstName: () => faker.person.firstName(),
+      lastName: () => faker.person.lastName(),
+      email: ({ firstName, lastName }) =>
+        `${firstName}.${lastName}@example.com`.toLowerCase(),
+      isAdmin: false,
+      createdAt: new Date('2023-01-01'),
+      hobbies: () => ['reading', 'gaming', 'coding'],
+      favoriteHobby: ({ hobbies }) => hobbies[0],
+    });
+
+    // Build user with overridden firstName and lastName
+    const user = userFactory.build({
+      overrides: {
+        firstName: 'John',
+        lastName: 'Doe',
+      },
+    });
+
+    // The email function should be re-evaluated with the new firstName and lastName
+    expect(user.firstName).toBe('John');
+    expect(user.lastName).toBe('Doe');
+    expect(user.email).toBe('john.doe@example.com');
+  });
+
+  it('updates dependent attribute functions when only one dependency is overridden', () => {
+    const userFactory = createFactory<User>().define({
+      id: () => faker.number.int(),
+      firstName: 'DefaultFirst',
+      lastName: 'DefaultLast',
+      email: ({ firstName, lastName }) =>
+        `${firstName}.${lastName}@example.com`.toLowerCase(),
+      isAdmin: false,
+      createdAt: new Date('2023-01-01'),
+      hobbies: () => ['reading', 'gaming', 'coding'],
+      favoriteHobby: ({ hobbies }) => hobbies[0],
+    });
+
+    // Override only firstName, lastName should remain default
+    const user1 = userFactory.build({
+      overrides: {
+        firstName: 'Jane',
+      },
+    });
+
+    expect(user1.firstName).toBe('Jane');
+    expect(user1.lastName).toBe('DefaultLast');
+    expect(user1.email).toBe('jane.defaultlast@example.com');
+
+    // Override only lastName, firstName should remain default
+    const user2 = userFactory.build({
+      overrides: {
+        lastName: 'Smith',
+      },
+    });
+
+    expect(user2.firstName).toBe('DefaultFirst');
+    expect(user2.lastName).toBe('Smith');
+    expect(user2.email).toBe('defaultfirst.smith@example.com');
+  });
+
   // New tests for nested overrides
   describe('nested overrides', () => {
     // Define interfaces for nested structures

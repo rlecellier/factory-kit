@@ -115,6 +115,31 @@ export function createFactory<T>(): Factory<T> {
       for (const [key, value] of Object.entries(options.overrides)) {
         applyNestedOverrides(instance, key, value);
       }
+
+      // Re-evaluate attribute functions after overrides have been applied
+      // This ensures functions that depend on overridden values get the correct data
+      for (const key of attributeKeys) {
+        const value = attributes[key as keyof AttributesFor<T>];
+
+        if (typeof value === 'function' && !isFakerDirectCall(value)) {
+          // Re-evaluate attribute functions with the updated instance
+          instance[key as keyof T] = value(instance, faker) as T[keyof T];
+        }
+      }
+
+      // Also re-evaluate trait attribute functions if traits were applied
+      if (options.traits) {
+        for (const traitName of options.traits) {
+          const trait = traits[traitName];
+          if (trait) {
+            for (const [key, value] of Object.entries(trait)) {
+              if (typeof value === 'function' && !isFakerDirectCall(value)) {
+                instance[key as keyof T] = value(instance, faker) as T[keyof T];
+              }
+            }
+          }
+        }
+      }
     }
 
     return instance;
