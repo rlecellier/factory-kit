@@ -14,9 +14,9 @@ interface User {
 describe('createFactory', () => {
   it('builds an object with default attributes', () => {
     const userFactory = createFactory<User>().define({
-      id: () => faker.datatype.number(),
-      firstName: () => faker.name.firstName(),
-      lastName: () => faker.name.lastName(),
+      id: () => faker.number.int(),
+      firstName: () => faker.person.firstName(),
+      lastName: () => faker.person.lastName(),
       // Now we can safely use firstName and lastName without non-null assertions
       // because our factory implementation guarantees they are set before this runs
       email: ({ firstName, lastName }) =>
@@ -59,9 +59,9 @@ describe('createFactory', () => {
   it('applies trait overrides', () => {
     const userFactory = createFactory<User>()
       .define({
-        id: () => faker.datatype.number(),
-        firstName: () => faker.name.firstName(),
-        lastName: () => faker.name.lastName(),
+        id: () => faker.number.int(),
+        firstName: () => faker.person.firstName(),
+        lastName: () => faker.person.lastName(),
         email: ({ firstName, lastName }) =>
           `${firstName}.${lastName}@example.com`.toLowerCase(),
         isAdmin: false,
@@ -78,9 +78,9 @@ describe('createFactory', () => {
 
   it('builds many instances', () => {
     const userFactory = createFactory<User>().define({
-      id: () => faker.datatype.number(),
-      firstName: () => faker.name.firstName(),
-      lastName: () => faker.name.lastName(),
+      id: () => faker.number.int(),
+      firstName: () => faker.person.firstName(),
+      lastName: () => faker.person.lastName(),
       email: () => faker.internet.email(),
       isAdmin: false,
       createdAt: new Date('2023-01-01'),
@@ -95,9 +95,9 @@ describe('createFactory', () => {
 
   it('accepts manual overrides', () => {
     const userFactory = createFactory<User>().define({
-      id: () => faker.datatype.number(),
-      firstName: () => faker.name.firstName(),
-      lastName: () => faker.name.lastName(),
+      id: () => faker.number.int(),
+      firstName: () => faker.person.firstName(),
+      lastName: () => faker.person.lastName(),
       email: () => faker.internet.email(),
       isAdmin: false,
       createdAt: new Date('2023-01-01'),
@@ -156,8 +156,8 @@ describe('createFactory', () => {
       });
 
       const userFactory = createFactory<CompleteUser>().define({
-        id: () => faker.datatype.number(),
-        name: () => faker.name.fullName(),
+        id: () => faker.number.int(),
+        name: () => faker.person.fullName(),
         profile: () => profileFactory.build(),
         metaData: { createdBy: 'system', tags: ['default'] },
         access_details: { role: 'user', permissions: ['read'] },
@@ -197,8 +197,8 @@ describe('createFactory', () => {
       });
 
       const userFactory = createFactory<CompleteUser>().define({
-        id: () => faker.datatype.number(),
-        name: () => faker.name.fullName(),
+        id: () => faker.number.int(),
+        name: () => faker.person.fullName(),
         profile: () => profileFactory.build(),
         metaData: { createdBy: 'system', tags: ['default'] },
         access_details: { role: 'user', permissions: ['read'] },
@@ -223,8 +223,8 @@ describe('createFactory', () => {
 
     it('supports camelCase property overrides', () => {
       const userFactory = createFactory<CompleteUser>().define({
-        id: () => faker.datatype.number(),
-        name: () => faker.name.fullName(),
+        id: () => faker.number.int(),
+        name: () => faker.person.fullName(),
         profile: {
           bio: 'Default bio',
           avatar: 'default.jpg',
@@ -258,8 +258,8 @@ describe('createFactory', () => {
 
     it('supports snake_case property overrides', () => {
       const userFactory = createFactory<CompleteUser>().define({
-        id: () => faker.datatype.number(),
-        name: () => faker.name.fullName(),
+        id: () => faker.number.int(),
+        name: () => faker.person.fullName(),
         profile: {
           bio: 'Default bio',
           avatar: 'default.jpg',
@@ -310,8 +310,8 @@ describe('createFactory', () => {
       });
 
       const userFactory = createFactory<CompleteUser>().define({
-        id: () => faker.datatype.number(),
-        name: () => faker.name.fullName(),
+        id: () => faker.number.int(),
+        name: () => faker.person.fullName(),
         profile: () => profileFactory.build(),
         metaData: { createdBy: 'system', tags: ['default'] },
         access_details: { role: 'user', permissions: ['read'] },
@@ -352,9 +352,9 @@ describe('createFactory', () => {
 
       // Create address factory
       const addressFactory = createFactory<Address>().define({
-        street: () => faker.address.streetAddress(),
-        city: () => faker.address.city(),
-        zipCode: () => faker.address.zipCode(),
+        street: () => faker.location.streetAddress(),
+        city: () => faker.location.city(),
+        zipCode: () => faker.location.zipCode(),
       });
 
       // Create contact factory that uses address factory
@@ -366,8 +366,8 @@ describe('createFactory', () => {
 
       // Create customer factory that uses contact factory
       const customerFactory = createFactory<Customer>().define({
-        id: () => faker.datatype.number(),
-        name: () => faker.name.fullName(),
+        id: () => faker.number.int(),
+        name: () => faker.person.fullName(),
         contact: () => contactFactory.build(),
       });
 

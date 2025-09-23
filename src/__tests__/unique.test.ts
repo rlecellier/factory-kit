@@ -99,7 +99,7 @@ describe('unique', () => {
 
     // Create a factory that generates users with unique emails
     const userFactory = createFactory<User>().define({
-      id: () => faker.datatype.uuid(),
+      id: () => faker.string.uuid(),
       email: unique(() => faker.internet.email().toLowerCase(), 'email'),
     });
 
