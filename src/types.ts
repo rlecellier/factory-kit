@@ -75,6 +75,14 @@ export interface Factory<T> {
   trait: (name: string, attributes: AttributesFor<T>) => Factory<T>;
 
   /**
+   * Creates a new factory that extends this one for a subtype.
+   *
+   * @template TExtended The extended type that includes all properties of T
+   * @returns A new factory instance for the extended type
+   */
+  extend: <TExtended extends T>() => Factory<TExtended>;
+
+  /**
    * Builds a single instance of the object.
    *
    * @param options Optional build configuration including traits and overrides
