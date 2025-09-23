@@ -26,10 +26,12 @@ Whether you're writing unit tests, integration tests, or creating demo applicati
 - [Advanced Features](#advanced-features)
   - [Using Traits](#using-traits)
   - [Overriding Attributes](#overriding-attributes)
+  - [Nested Overrides](#nested-overrides)
   - [Unique Values](#unique-values)
   - [Sequences](#sequences)
   - [Dependent Attributes](#dependent-attributes)
   - [Related Factories](#related-factories)
+  - [Factory Inheritance](#factory-inheritance)
 - [API Reference](#api-reference)
 - [Roadmap](#roadmap)
   - [Missing Features](#missing-features)
@@ -51,6 +53,8 @@ yarn add factory-kit @faker-js/faker
 - **Type Safety**: Full TypeScript support ensures your factories produce objects that match your interfaces
 - **Realistic Data**: Leverage Faker.js to generate realistic names, emails, dates, and more
 - **Composable**: Combine factories to create complex, related object structures
+- **Inheritance**: Extend factories to create specialized versions with additional attributes
+- **Trait System**: Define variations of your factories with traits that can be mixed and matched
 
 ## Basic Usage
 
@@ -413,6 +417,124 @@ const user = userFactory.build();
 console.log(user.profile); // Contains a generated profile
 ```
 
+### Factory Inheritance
+
+Factory inheritance allows you to create specialized factories that extend base factories, inheriting all their attributes and traits while adding new ones. This is particularly useful for creating hierarchical object structures or when you have similar objects with variations.
+
+```typescript
+import { createFactory } from 'factory-kit';
+import { faker } from '@faker-js/faker';
+
+interface Person {
+  name: string;
+  email: string;
+  age: number;
+}
+
+interface Employee extends Person {
+  employeeId: number;
+  department: string;
+  hireDate: Date;
+}
+
+interface Manager extends Employee {
+  subordinates: string[];
+  level: string;
+}
+
+// Base person factory
+const personFactory = createFactory<Person>().define({
+  name: () => faker.person.fullName(),
+  email: () => faker.internet.email(),
+  age: () => faker.number.int({ min: 18, max: 65 }),
+});
+
+// Employee extends Person with additional attributes
+const employeeFactory = personFactory.extend<Employee>().define({
+  employeeId: () => faker.number.int(),
+  department: () => faker.commerce.department(),
+  hireDate: () => faker.date.past(),
+});
+
+// Manager extends Employee with additional attributes
+const managerFactory = employeeFactory.extend<Manager>().define({
+  subordinates: () => [],
+  level: 'middle',
+});
+
+const manager = managerFactory.build();
+// Contains all attributes from Person, Employee, and Manager
+console.log(manager.name);        // From Person
+console.log(manager.employeeId);  // From Employee
+console.log(manager.level);       // From Manager
+```
+
+#### Trait Inheritance
+
+Inherited factories also inherit all traits from their parent factories:
+
+```typescript
+const personFactory = createFactory<Person>()
+  .define({
+    name: () => faker.person.fullName(),
+    email: () => faker.internet.email(),
+    age: () => faker.number.int({ min: 18, max: 65 }),
+  })
+  .trait('senior', {
+    age: () => faker.number.int({ min: 60, max: 80 }),
+  });
+
+const employeeFactory = personFactory.extend<Employee>()
+  .define({
+    employeeId: () => faker.number.int(),
+    department: () => faker.commerce.department(),
+    hireDate: () => faker.date.past(),
+  })
+  .trait('remote', {
+    department: 'Remote Engineering',
+  });
+
+// Can use traits from both parent and child factories
+const seniorRemoteEmployee = employeeFactory.build({
+  traits: ['senior', 'remote'],
+});
+
+console.log(seniorRemoteEmployee.age);        // 60-80 (senior trait)
+console.log(seniorRemoteEmployee.department); // 'Remote Engineering' (remote trait)
+```
+
+#### Inheritance with All Features
+
+Inherited factories support all factory features including sequences, unique values, nested overrides, and dependent attributes:
+
+```typescript
+import { sequence, unique } from 'factory-kit';
+
+const personFactory = createFactory<Person>().define({
+  name: () => faker.person.fullName(),
+  email: unique(() => faker.internet.email().toLowerCase(), 'email'),
+  age: () => faker.number.int({ min: 18, max: 65 }),
+});
+
+const employeeFactory = personFactory.extend<Employee>().define({
+  employeeId: sequence((n) => n + 1000), // Sequential employee IDs starting from 1001
+  department: () => faker.commerce.department(),
+  hireDate: () => faker.date.past(),
+});
+
+// Build multiple employees with unique emails and sequential IDs
+const employees = employeeFactory.buildMany(3);
+// Results in employees with IDs 1001, 1002, 1003 and unique emails
+
+// Override inherited attributes
+const customEmployee = employeeFactory.build({
+  overrides: {
+    name: 'John Doe',           // Override Person attribute
+    department: 'Engineering',  // Override Employee attribute
+  },
+});
+```
+
 ## API Reference
 
 ### createFactory<T>()
@@ -439,6 +561,14 @@ Defines a trait that can be applied when building objects.
 - `attributes`: An object containing attribute overrides for this trait.
 
 **Returns:** The factory instance for chaining
+
+#### extend<TExtended extends T>(): Factory<TExtended>
+
+Creates a new factory that extends this one for a subtype, inheriting all attributes and traits.
+
+- `TExtended`: The extended type that includes all properties of T plus additional ones.
+
+**Returns:** A new factory instance for the extended type
 
 #### build(options?: BuildOptions<T>): T
 
@@ -488,35 +618,6 @@ The following features are planned for future releases:
 
   // Hooks will run during build process
   const user = userFactory.build();
-  ```
-
-- **Inheritance** - Factory inheritance to create specialized factories from base factories
-
-  ```typescript
-  import { createFactory } from 'factory-kit';
-
-  // Base person factory
-  const personFactory = createFactory<Person>().define({
-    name: () => faker.name.fullName(),
-    email: () => faker.internet.email(),
-    age: () => faker.datatype.number({ min: 18, max: 65 }),
-  });
-
-  // Employee extends Person with additional attributes
-  const employeeFactory = personFactory.extend<Employee>().define({
-    employeeId: () => faker.datatype.number(),
-    department: () => faker.commerce.department(),
-    hireDate: () => faker.date.past(),
-  });
-
-  // Manager extends Employee with additional attributes
-  const managerFactory = employeeFactory.extend<Manager>().define({
-    subordinates: () => [],
-    level: 'middle',
-  });
-
-  const manager = managerFactory.build();
-  // Contains all attributes from Person, Employee, and Manager
   ```
 
 - **Transient Attributes** - Attributes used during building but not included in the final object

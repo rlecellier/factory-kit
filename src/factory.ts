@@ -127,6 +127,20 @@ export function createFactory<T>(): Factory<T> {
       return factory;
     },
 
+    extend: <TExtended extends T>() => {
+      const extendedFactory = createFactory<TExtended>();
+      // Copy all existing attributes to the new factory
+      extendedFactory.define(attributes as AttributesFor<TExtended>);
+      // Copy all existing traits to the new factory
+      Object.entries(traits).forEach(([name, traitAttributes]) => {
+        extendedFactory.trait(
+          name,
+          traitAttributes as AttributesFor<TExtended>
+        );
+      });
+      return extendedFactory;
+    },
+
     build: (options = {}) => {
       return buildInstance(options);
     },
