@@ -5,7 +5,6 @@ const config: JestConfigWithTsJest = {
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^factory-kit$': '<rootDir>/../../dist/index.js',
   },
   transform: {
     '^.+\\.ts$': [

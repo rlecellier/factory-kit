@@ -1,3 +1,5 @@
+import type { Faker } from '@faker-js/faker';
+
 /**
  * A function that dynamically generates a value for a specific attribute of type T.
  * When this function is called, all attributes defined before this one
@@ -155,24 +157,4 @@ export interface Factory<T> {
    * @returns An array of instances of type T
    */
   buildMany: (count: number, options?: BuildOptions<T>) => T[];
-}
-
-/**
- * Simplified interface for the Faker library used for generating test data.
- * This avoids direct dependency on the Faker library in type definitions.
- */
-export interface Faker {
-  name: {
-    firstName: () => string;
-    lastName: () => string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
-  internet: {
-    email: () => string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
 }

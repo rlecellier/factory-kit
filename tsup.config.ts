@@ -11,12 +11,19 @@ export default defineConfig({
   dts: true,
   minify: true,
   sourcemap: false,
-  splitting: true,
-  esbuildOptions(options) {
+  splitting: false, // Disable splitting for better compatibility
+  esbuildOptions(options, { format }) {
     options.alias = {
       '@': './src',
     };
+    options.treeShaking = false;
     options.ignoreAnnotations = true;
-    options.outExtension = { '.js': '.js' };
+
+    // Set proper file extensions based on format
+    if (format === 'cjs') {
+      options.outExtension = { '.js': '.cjs' };
+    } else {
+      options.outExtension = { '.js': '.js' };
+    }
   },
 });

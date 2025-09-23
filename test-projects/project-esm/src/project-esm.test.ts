@@ -84,14 +84,14 @@ describe('factory-kit with ESM', () => {
         overrides: {
           firstName: 'Custom',
           lastName: 'User',
-          email: 'custom@example.org',
+          role: 'admin',
         },
       });
 
       expect(customUser.firstName).toBe('Custom');
       expect(customUser.lastName).toBe('User');
-      expect(customUser.email).toBe('custom@example.org');
-      expect(customUser.role).toBe('user'); // Not overriden
+      expect(customUser.email).toBe('Custom.User@example.com'); // Computed from overridden names
+      expect(customUser.role).toBe('admin'); // Overridden
     });
   });
 
@@ -103,7 +103,7 @@ describe('factory-kit with ESM', () => {
 
     const uniqueFactory = createFactory<UniqueObject>().define({
       id: unique(() => faker.string.uuid(), 'id'),
-      username: unique(() => faker.internet.userName(), 'username'),
+      username: unique(faker.internet.username, 'username'),
     });
 
     it('should generate unique values for multiple builds', () => {
