@@ -1,21 +1,21 @@
 {
   "name": "factory-kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Factory pattern implementation for generating test data with Faker, inspired by FactoryBoy",
   "scripts": {
+    "build": "run-s build:clean build:code",
     "build:clean": "rimraf dist",
     "build:code": "tsup-node",
-    "build": "run-s build:clean build:code",
+    "format": "prettier --cache --write .",
     "generate:types": "tsc --project tsconfig.json --emitDeclarationOnly --declarationMap",
+    "lint:all": "eslint --max-warnings 0 .",
+    "lint:factory-kit": "eslint --max-warnings 0 . --ignore-pattern test-projects/",
+    "lint:project-cjs": "eslint --max-warnings 0 test-projects/project-cjs/",
+    "lint:project-esm": "eslint --max-warnings 0 test-projects/project-esm/",
+    "prepublishOnly": "npm run build",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:all": "yarn test && yarn build && yarn lint",
-    "lint:factory-kit": "eslint --max-warnings 0 . --ignore-pattern test-projects/",
-    "lint:project-esm": "eslint --max-warnings 0 test-projects/project-esm/",
-    "lint:project-cjs": "eslint --max-warnings 0 test-projects/project-cjs/",
-    "lint:all": "eslint --max-warnings 0 .",
-    "ts-check": "tsc",
-    "prepublishOnly": "npm run build",
-    "format": "prettier --cache --write ."
+    "ts-check": "tsc"
   },
   "keywords": [
     "factory",
