@@ -96,9 +96,7 @@ export type NestedOverrides<T> = {
 export type BuildOptions<T> = {
   traits?: string[];
   overrides?: Partial<T> & NestedOverrides<T>;
-};
-
-/**
+}; /**
  * Factory interface for extended factories that only require additional attributes
  */
 export interface ExtendedFactory<TExtended, T> {
@@ -143,18 +141,27 @@ export interface Factory<T> {
 
   /**
    * Builds a single instance of the object.
+   * Can be used with explicit type parameter for type narrowing with union types.
    *
+   * @template TResult The expected result type (defaults to T, can be narrowed)
    * @param options Optional build configuration including traits and overrides
-   * @returns A new instance of type T
+   * @returns A new instance of type TResult
    */
-  build: (options?: BuildOptions<T>) => T;
+  // TResult is needed to avoid TypeScript inferring T when a more specific type is desired
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  build: <TResult extends T = T>(options?: BuildOptions<T>) => TResult;
 
   /**
    * Builds multiple instances of the object.
+   * Can be used with explicit type parameter for type narrowing with union types.
    *
+   * @template TResult The expected result type (defaults to T, can be narrowed)
    * @param count The number of instances to build
    * @param options Optional build configuration including traits and overrides
-   * @returns An array of instances of type T
+   * @returns An array of instances of type TResult
    */
-  buildMany: (count: number, options?: BuildOptions<T>) => T[];
+  buildMany: <TResult extends T = T>(
+    count: number,
+    options?: BuildOptions<T>
+  ) => TResult[];
 }

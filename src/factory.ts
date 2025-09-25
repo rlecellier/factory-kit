@@ -145,8 +145,7 @@ export function createFactory<T>(): Factory<T> {
     return instance;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  const factory: Factory<T> & Record<string, Function> = {
+  const factory: Factory<T> = {
     define: (newAttributes) => {
       Object.assign(attributes, newAttributes);
       return factory;
@@ -187,14 +186,16 @@ export function createFactory<T>(): Factory<T> {
       return extendedFactory;
     },
 
-    build: (options = {}) => {
-      return buildInstance(options);
+    // TResult is needed to avoid TypeScript inferring T when a more specific type is desired
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+    build: <TResult extends T = T>(options = {}) => {
+      return buildInstance(options) as TResult;
     },
 
-    buildMany: (count, options = {}) => {
-      const results: T[] = [];
+    buildMany: <TResult extends T = T>(count: number, options = {}) => {
+      const results: TResult[] = [];
       for (let i = 0; i < count; i++) {
-        results.push(buildInstance(options));
+        results.push(buildInstance(options) as TResult);
       }
 
       return results;
